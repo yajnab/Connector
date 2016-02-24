@@ -26,14 +26,16 @@ public class login extends javax.swing.JFrame {
     /**
      * Creates new form login
      */
+    
     WebClient webClient = new WebClient(BrowserVersion.FIREFOX_38); 
     public login() throws IOException {
         initComponents();
-        //jButton1.setEnabled(false);
+        jButton2.setVisible(false);
         //netcheck();
         if(netcheck()){
             if(logincheck()){
-                jButton1.setEnabled(false);
+                jButton1.setVisible(false);
+                jButton2.setVisible(true);
                 jLabel3.setText("Already Logged in");
             }
                     
@@ -56,6 +58,7 @@ public class login extends javax.swing.JFrame {
         jLabel1 = new javax.swing.JLabel();
         jLabel2 = new javax.swing.JLabel();
         jLabel3 = new javax.swing.JLabel();
+        jButton2 = new javax.swing.JButton();
 
         setDefaultCloseOperation(javax.swing.WindowConstants.EXIT_ON_CLOSE);
 
@@ -69,6 +72,13 @@ public class login extends javax.swing.JFrame {
         jLabel1.setText("ID");
 
         jLabel2.setText("Password");
+
+        jButton2.setText("LogOut");
+        jButton2.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                jButton2ActionPerformed(evt);
+            }
+        });
 
         javax.swing.GroupLayout layout = new javax.swing.GroupLayout(getContentPane());
         getContentPane().setLayout(layout);
@@ -87,11 +97,13 @@ public class login extends javax.swing.JFrame {
             .addGroup(layout.createSequentialGroup()
                 .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                     .addGroup(layout.createSequentialGroup()
-                        .addGap(162, 162, 162)
-                        .addComponent(jButton1))
-                    .addGroup(layout.createSequentialGroup()
                         .addGap(67, 67, 67)
-                        .addComponent(jLabel3, javax.swing.GroupLayout.PREFERRED_SIZE, 278, javax.swing.GroupLayout.PREFERRED_SIZE)))
+                        .addComponent(jLabel3, javax.swing.GroupLayout.PREFERRED_SIZE, 278, javax.swing.GroupLayout.PREFERRED_SIZE))
+                    .addGroup(layout.createSequentialGroup()
+                        .addGap(140, 140, 140)
+                        .addComponent(jButton1)
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
+                        .addComponent(jButton2)))
                 .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
         );
         layout.setVerticalGroup(
@@ -109,7 +121,9 @@ public class login extends javax.swing.JFrame {
                 .addGap(36, 36, 36)
                 .addComponent(jLabel3, javax.swing.GroupLayout.PREFERRED_SIZE, 23, javax.swing.GroupLayout.PREFERRED_SIZE)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
-                .addComponent(jButton1)
+                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                    .addComponent(jButton1)
+                    .addComponent(jButton2))
                 .addGap(44, 44, 44))
         );
 
@@ -150,11 +164,28 @@ public class login extends javax.swing.JFrame {
             final HtmlPage page2;
             try{HtmlElement htmlElement = currentPage.getFirstByXPath("//*[@name=\"login\"]");
             HtmlPage src=htmlElement.click();
-            if(logincheck()){jLabel3.setText("Logged In");}if(!logincheck()){jLabel3.setText("Please Check ID and Password");}}
+            if(logincheck()){jLabel3.setText("Logged In");jButton1.setVisible(false);jButton2.setVisible(true);}if(!logincheck()){jLabel3.setText("Please Check ID and Password");jButton1.setVisible(true);jButton2.setVisible(false);}}
             catch(Exception e){
                 jLabel3.setText("Couldn't Click");
             }
         
+        return webClient;
+    }
+    public WebClient logout()throws Exception{
+                webClient.getOptions().setJavaScriptEnabled(false);
+                 final HtmlPage currentPage = webClient.getPage("http://10.254.254.17/0/up/");
+                 try{
+                     HtmlElement htmlElement = currentPage.getFirstByXPath("//*[@name=\"logout\"]");
+                     HtmlPage src = htmlElement.click();
+                     jLabel3.setText("Logged out");
+                     jButton1.setVisible(true);jButton2.setVisible(false);
+                 }
+                 catch(Exception e){
+                     jLabel3.setText("Couldn't Log Out");
+                     jButton1.setVisible(false);jButton2.setVisible(true);
+                     
+                 }
+                 
         return webClient;
     }
     private void jButton1ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButton1ActionPerformed
@@ -169,6 +200,16 @@ public class login extends javax.swing.JFrame {
         }
         
     }//GEN-LAST:event_jButton1ActionPerformed
+
+    private void jButton2ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButton2ActionPerformed
+        // TODO add your handling code here:
+        try {
+            webClient = logout();
+        } catch (Exception ex) {
+            Logger.getLogger(login.class.getName()).log(Level.SEVERE, null, ex);
+            //System.out.println("Error");
+        }
+    }//GEN-LAST:event_jButton2ActionPerformed
 
     /**
      * @param args the command line arguments
@@ -211,6 +252,7 @@ public class login extends javax.swing.JFrame {
 
     // Variables declaration - do not modify//GEN-BEGIN:variables
     private javax.swing.JButton jButton1;
+    private javax.swing.JButton jButton2;
     private javax.swing.JLabel jLabel1;
     private javax.swing.JLabel jLabel2;
     private javax.swing.JLabel jLabel3;
