@@ -12,6 +12,7 @@ import com.gargoylesoftware.htmlunit.html.HtmlElement;
 import com.gargoylesoftware.htmlunit.html.HtmlInput;
 import com.gargoylesoftware.htmlunit.html.HtmlPage;
 import java.io.BufferedReader;
+import java.io.IOException;
 import java.io.InputStreamReader;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -25,8 +26,19 @@ public class login extends javax.swing.JFrame {
     /**
      * Creates new form login
      */
-    public login() {
+    WebClient webClient = new WebClient(BrowserVersion.FIREFOX_38); 
+    public login() throws IOException {
         initComponents();
+        //jButton1.setEnabled(false);
+        //netcheck();
+        if(netcheck()){
+            if(logincheck()){
+                jButton1.setEnabled(false);
+                jLabel3.setText("Already Logged in");
+            }
+                    
+        }
+        else if(!netcheck()){jLabel3.setText("No Internet Connection");}
     }
 
     /**
@@ -43,6 +55,7 @@ public class login extends javax.swing.JFrame {
         jTextField2 = new javax.swing.JTextField();
         jLabel1 = new javax.swing.JLabel();
         jLabel2 = new javax.swing.JLabel();
+        jLabel3 = new javax.swing.JLabel();
 
         setDefaultCloseOperation(javax.swing.WindowConstants.EXIT_ON_CLOSE);
 
@@ -72,8 +85,13 @@ public class login extends javax.swing.JFrame {
                     .addComponent(jTextField1, javax.swing.GroupLayout.PREFERRED_SIZE, 188, javax.swing.GroupLayout.PREFERRED_SIZE))
                 .addGap(34, 34, 34))
             .addGroup(layout.createSequentialGroup()
-                .addGap(162, 162, 162)
-                .addComponent(jButton1)
+                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                    .addGroup(layout.createSequentialGroup()
+                        .addGap(162, 162, 162)
+                        .addComponent(jButton1))
+                    .addGroup(layout.createSequentialGroup()
+                        .addGap(67, 67, 67)
+                        .addComponent(jLabel3, javax.swing.GroupLayout.PREFERRED_SIZE, 278, javax.swing.GroupLayout.PREFERRED_SIZE)))
                 .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
         );
         layout.setVerticalGroup(
@@ -88,39 +106,66 @@ public class login extends javax.swing.JFrame {
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                         .addComponent(jTextField2, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
                     .addComponent(jLabel2, javax.swing.GroupLayout.Alignment.TRAILING))
-                .addGap(71, 71, 71)
+                .addGap(36, 36, 36)
+                .addComponent(jLabel3, javax.swing.GroupLayout.PREFERRED_SIZE, 23, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
                 .addComponent(jButton1)
                 .addGap(44, 44, 44))
         );
 
         pack();
     }// </editor-fold>//GEN-END:initComponents
-    private static WebClient login(WebClient webClient, String uID, String uPasswd) throws Exception
+    public boolean netcheck(){
+        try{
+        final HtmlPage currentPage = webClient.getPage("http://10.254.254.17/0/up/");
+        }//Load Alliance Broadband Login Page
+        catch(Exception e){System.out.println("Website Load Failed");return false;}
+        return true;
+    }
+    public boolean logincheck() throws IOException{
+        final HtmlPage currentPage = webClient.getPage("http://10.254.254.17/0/up/");
+        
+        try{
+            final  HtmlInput username = (HtmlInput) currentPage.getElementById("password");
+            username.setValueAttribute("test");
+        }
+        catch(Exception e){ return true;
+        }
+        return false;             
+    }
+    public WebClient login(WebClient webClient, String uID, String uPasswd) throws Exception
     {
-        webClient.getOptions().setJavaScriptEnabled(false);    
-        final HtmlPage currentPage = webClient.getPage("http://10.254.254.17/0/up/"); //Load Alliance Broadband Login Page
-        final  HtmlInput username = (HtmlInput) currentPage.getElementById("username");
-        username.setValueAttribute(uID); //Set value for username       
-        final  HtmlInput password = (HtmlInput) currentPage.getElementById("password"); //Find element called loginpassword for password
-        //System.out.println("Enter Password");
-        //BufferedReader in = new BufferedReader(new InputStreamReader(System.in));
-        //String passd = in.readLine();
-        password.setValueAttribute(uPasswd); //Set value for password   
-        WebResponse response1 = currentPage.getWebResponse();
-        String content2 = response1.getContentAsString();    
-        final HtmlPage page2; 
-        HtmlElement htmlElement = currentPage.getFirstByXPath("//*[@name=\"login\"]");
-        HtmlPage src=htmlElement.click();       
+        webClient.getOptions().setJavaScriptEnabled(false);int n=1,k=1;
+        final HtmlPage currentPage = webClient.getPage("http://10.254.254.17/0/up/");
+            try{
+                final  HtmlInput username = (HtmlInput) currentPage.getElementById("username");
+                username.setValueAttribute(uID); //Set value for username
+                final  HtmlInput password = (HtmlInput) currentPage.getElementById("password"); //Find element called loginpassword for password
+                password.setValueAttribute(uPasswd); //Set value for password
+            }
+            catch(Exception e){jLabel3.setText("Login Error while putting Values");}
+            WebResponse response1 = currentPage.getWebResponse();
+            String content2 = response1.getContentAsString();
+            //System.out.println(content2);
+            final HtmlPage page2;
+            try{HtmlElement htmlElement = currentPage.getFirstByXPath("//*[@name=\"login\"]");
+            HtmlPage src=htmlElement.click();
+            if(logincheck()){jLabel3.setText("Logged In");}if(!logincheck()){jLabel3.setText("Please Check ID and Password");}}
+            catch(Exception e){
+                jLabel3.setText("Couldn't Click");
+            }
+        
         return webClient;
     }
     private void jButton1ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButton1ActionPerformed
-     WebClient webClient = new WebClient(BrowserVersion.FIREFOX_38); //Initiate a WebClient variable.   
+     //Initiate a WebClient variable.   
      String uID = jTextField1.getText();
         String uPasswd = jTextField2.getText();   
      try {
             webClient = login(webClient, uID, uPasswd);
         } catch (Exception ex) {
             Logger.getLogger(login.class.getName()).log(Level.SEVERE, null, ex);
+            //System.out.println("Error");
         }
         
     }//GEN-LAST:event_jButton1ActionPerformed
@@ -155,7 +200,11 @@ public class login extends javax.swing.JFrame {
         /* Create and display the form */
         java.awt.EventQueue.invokeLater(new Runnable() {
             public void run() {
-                new login().setVisible(true);
+                try {
+                    new login().setVisible(true);
+                } catch (IOException ex) {
+                    Logger.getLogger(login.class.getName()).log(Level.SEVERE, null, ex);
+                }
             }
         });
     }
@@ -164,6 +213,7 @@ public class login extends javax.swing.JFrame {
     private javax.swing.JButton jButton1;
     private javax.swing.JLabel jLabel1;
     private javax.swing.JLabel jLabel2;
+    private javax.swing.JLabel jLabel3;
     private javax.swing.JTextField jTextField1;
     private javax.swing.JTextField jTextField2;
     // End of variables declaration//GEN-END:variables
